@@ -46,7 +46,7 @@ func NewPayment(req PaymentRequest) (*Payment, error) {
 	return payment, nil
 }
 
-func (u *Payment) AddPaymentStatus(newStatus string) error {
+func (u *Payment) AddPaymentStatus(newStatus PaymentStatusType) error {
 
 	if newStatus == "" {
 		return PaymentStatusMustNotEmptyError

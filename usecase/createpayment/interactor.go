@@ -84,7 +84,7 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 	}
 
 	{
-		err := paymentToStored.AddPaymentStatus("INIT")
+		err := paymentToStored.AddPaymentStatus(model.WaitingPaymentStatus)
 		if err != nil {
 			return nil, err
 		}

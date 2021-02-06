@@ -2,6 +2,8 @@ package port
 
 import (
 	"context"
+
+	"github.com/mirzaakhena/oms/domain/model"
 )
 
 // CreateOrderOutport ...
@@ -10,16 +12,12 @@ type CreateOrderOutport interface {
 	CreatePayment(ctx context.Context, req CreatePaymentRequest) (*CreatePaymentResponse, error)
 	GetAllMenuItemPrice(ctx context.Context, req GetAllMenuItemPriceRequest) (*GetAllMenuItemPriceResponse, error)
 	GenerateOrderID(ctx context.Context, req GenerateOrderIDRequest) (*GenerateOrderIDResponse, error)
+	GetOrderFinishNotifyURL(ctx context.Context, req GetOrderFinishNotifyURLRequest) (*GetOrderFinishNotifyURLResponse, error)
 }
 
 // SaveOrderRequest ...
 type SaveOrderRequest struct {
-	OrderID       string
-	OutletCode    string
-	PhoneNumber   string
-	TableNumber   string
-	PaymentMethod string
-	OrderLine     []OrderItem
+	Order *model.Order
 }
 
 // SaveOrderResponse ...
@@ -28,9 +26,10 @@ type SaveOrderResponse struct {
 
 // CreatePaymentRequest ...
 type CreatePaymentRequest struct {
-	PhoneNumber string
-	OrderID     string
-	TotalAmount float64
+	PhoneNumber          string
+	OrderID              string
+	TotalAmount          float64
+	OrderFinishNotifyURL string
 }
 
 // CreatePaymentResponse ...
@@ -56,4 +55,13 @@ type GenerateOrderIDRequest struct {
 // GenerateOrderIDResponse ...
 type GenerateOrderIDResponse struct {
 	OrderID string
+}
+
+// GetOrderFinishNotifyURLRequest ...
+type GetOrderFinishNotifyURLRequest struct {
+}
+
+// GetOrderFinishNotifyURLResponse ...
+type GetOrderFinishNotifyURLResponse struct {
+	OrderFinishNotifyURL string
 }

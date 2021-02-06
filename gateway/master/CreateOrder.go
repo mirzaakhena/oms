@@ -2,7 +2,6 @@ package master
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/mirzaakhena/oms/domain/model"
@@ -30,11 +29,11 @@ func (r *createOrder) SaveOrder(ctx context.Context, req port.SaveOrderRequest) 
 
 	{
 		err := r.DB.Create(&model.Order{
-			ID:            req.OrderID,
-			OutletCode:    req.OutletCode,
-			PhoneNumber:   req.PhoneNumber,
-			TableNumber:   req.TableNumber,
-			PaymentMethod: req.PaymentMethod,
+			ID:            req.Order.ID,
+			OutletCode:    req.Order.OutletCode,
+			PhoneNumber:   req.Order.PhoneNumber,
+			TableNumber:   req.Order.TableNumber,
+			PaymentMethod: req.Order.PaymentMethod,
 		}).Error
 
 		if err != nil {
@@ -43,33 +42,20 @@ func (r *createOrder) SaveOrder(ctx context.Context, req port.SaveOrderRequest) 
 	}
 
 	{
-		orderItems := []model.OrderItem{}
-		for _, orderItem := range req.OrderLine {
-			orderItems = append(orderItems, model.OrderItem{
-				ID:           uuid.NewString(),
-				OrderID:      req.OrderID,
-				MenuItemCode: orderItem.MenuItemCode,
-				Quantity:     orderItem.Quantity,
-			})
-		}
+		// orderItems := []model.OrderItem{}
+		// for _, orderItem := range req.OrderLine {
+		// 	orderItems = append(orderItems, model.OrderItem{
+		// 		ID:           uuid.NewString(),
+		// 		OrderID:      req.OrderID,
+		// 		MenuItemCode: orderItem.MenuItemCode,
+		// 		Quantity:     orderItem.Quantity,
+		// 	})
+		// }
 
-		err := r.DB.Create(&orderItems).Error
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		err := r.DB.Create(&model.OrderStatus{
-			ID:      uuid.NewString(),
-			OrderID: req.OrderID,
-			Date:    time.Now(),
-			Status:  "WAITING_FOR_PAYMENT",
-		}).Error
-
-		if err != nil {
-			return nil, err
-		}
+		// err := r.DB.Create(&orderItems).Error
+		// if err != nil {
+		// 	return nil, err
+		// }
 	}
 
 	var res port.SaveOrderResponse
@@ -125,6 +111,17 @@ func (r *createOrder) GenerateOrderID(ctx context.Context, req port.GenerateOrde
 
 	var res port.GenerateOrderIDResponse
 	res.OrderID = uuid.NewString()
+
+	log.Info(ctx, "Response %v", util.ToJSON(res))
+	return &res, nil
+}
+
+// GetOrderFinishNotifyURL ...
+func (r *createOrder) GetOrderFinishNotifyURL(ctx context.Context, req port.GetOrderFinishNotifyURLRequest) (*port.GetOrderFinishNotifyURLResponse, error) {
+	log.Info(ctx, "Request  %v", util.ToJSON(req))
+
+	var res port.GetOrderFinishNotifyURLResponse
+	res.OrderFinishNotifyURL = "https://pleasenotifymefromhere"
 
 	log.Info(ctx, "Response %v", util.ToJSON(res))
 	return &res, nil

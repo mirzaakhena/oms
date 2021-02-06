@@ -2,9 +2,8 @@ package createorder
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
+	"github.com/mirzaakhena/oms/domain/model"
 	"github.com/mirzaakhena/oms/usecase/createorder/port"
 )
 
@@ -24,62 +23,62 @@ type createOrderInteractor struct {
 // Execute ...
 func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrderRequest) (*port.CreateOrderResponse, error) {
 
-	if strings.TrimSpace(req.OutletCode) == "" {
-		return nil, fmt.Errorf("OutletCode must not blank")
-	}
-
-	if strings.TrimSpace(req.PhoneNumber) == "" {
-		return nil, fmt.Errorf("PhoneNumber must not blank")
-	}
-
-	if strings.TrimSpace(req.PaymentMethod) == "" {
-		return nil, fmt.Errorf("PaymentMethod must not blank")
-	}
-
-	if len(req.OrderLine) == 0 {
-		return nil, fmt.Errorf("OrderLine must not empty")
-	}
-
 	var res port.CreateOrderResponse
 
-	orderID := ""
 	{
 		resOutport, err := r.gateway.GenerateOrderID(ctx, port.GenerateOrderIDRequest{ //
 			OutletCode: req.OutletCode,
 		})
-
 		if err != nil {
 			return nil, err
 		}
-
 		res.OrderID = resOutport.OrderID
-
 	}
 
+	var orderToSave *model.Order
 	{
-		_, err := r.gateway.SaveOrder(ctx, port.SaveOrderRequest{ //
-			OrderID:       orderID,
+		order, err := model.NewOrder(model.OrderRequest{
+			OrderID:       res.OrderID,
 			OutletCode:    req.OutletCode,
 			PhoneNumber:   req.PhoneNumber,
 			TableNumber:   req.TableNumber,
 			PaymentMethod: req.PaymentMethod,
-			OrderLine:     req.OrderLine,
 		})
 
 		if err != nil {
 			return nil, err
 		}
 
+		orderToSave = order
 	}
 
-	menuItemCodes := []string{}
-	for _, orderItem := range req.OrderLine {
-		menuItemCodes = append(menuItemCodes, orderItem.MenuItemCode)
+	{
+		for _, orderItem := range req.OrderLine {
+			err := orderToSave.AddOrderItem(model.OrderItemRequest{
+				MenuItemCode: orderItem.MenuItemCode,
+				Quantity:     orderItem.Quantity,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	{
+		err := orderToSave.ValidateOrderItem()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var menuItemCodeWithPrices map[string]float64
-
 	{
+
+		menuItemCodes := []string{}
+		for _, orderItem := range req.OrderLine {
+			menuItemCodes = append(menuItemCodes, orderItem.MenuItemCode)
+		}
+
 		resOutport, err := r.gateway.GetAllMenuItemPrice(ctx, port.GetAllMenuItemPriceRequest{ //
 			MenuItemCodes: menuItemCodes,
 		})
@@ -91,17 +90,34 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 		menuItemCodeWithPrices = resOutport.MenuItemWithPrices
 	}
 
-	totalAmount := 0.0
-	for _, orderItem := range req.OrderLine {
-		price := menuItemCodeWithPrices[orderItem.MenuItemCode] * float64(orderItem.Quantity)
-		totalAmount += price
+	totalPrice := orderToSave.GetTotalPrice(func(menuItemCode string) float64 {
+		return menuItemCodeWithPrices[menuItemCode]
+	})
+
+	{
+		_, err := r.gateway.SaveOrder(ctx, port.SaveOrderRequest{ //
+			Order: orderToSave,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var orderFinihNotifyURL string
+	{
+		outportRes, err := r.gateway.GetOrderFinishNotifyURL(ctx, port.GetOrderFinishNotifyURLRequest{})
+		if err != nil {
+			return nil, err
+		}
+		orderFinihNotifyURL = outportRes.OrderFinishNotifyURL
 	}
 
 	{
 		resOutport, err := r.gateway.CreatePayment(ctx, port.CreatePaymentRequest{ //
-			PhoneNumber: req.PhoneNumber,
-			TotalAmount: totalAmount,
-			OrderID:     res.OrderID,
+			PhoneNumber:          req.PhoneNumber,
+			TotalAmount:          totalPrice,
+			OrderID:              res.OrderID,
+			OrderFinishNotifyURL: orderFinihNotifyURL,
 		})
 
 		if err != nil {
