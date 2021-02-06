@@ -30,14 +30,17 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 		outportRes, err := r.gateway.GetUser(ctx, port.GetUserRequest{
 			PhoneNumber: req.PhoneNumber,
 		})
+
 		if err != nil {
 			return nil, err
 		}
+
 		user = outportRes.User
 	}
 
 	{
-		err := user.ValidateActivation()
+		err := user.ValidateUserAbilityToPay()
+
 		if err != nil {
 			return nil, err
 		}
@@ -48,14 +51,16 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 		outportRes, err := r.gateway.GetLatestUserBalance(ctx, port.GetLatestUserBalanceRequest{ //
 			PhoneNumber: req.PhoneNumber,
 		})
+
 		if err != nil {
 			return nil, err
 		}
+
 		latestBalance = outportRes.UserBalance
 	}
 
 	{
-		err := latestBalance.ValidatePaymentBalance(req.TotalAmount)
+		err := latestBalance.ValidatePaymentBalanceIsEnough(req.TotalAmount)
 		if err != nil {
 			return nil, err
 		}
@@ -63,9 +68,11 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 
 	{
 		outportRes, err := r.gateway.GenerateID(ctx, port.GenerateIDRequest{})
+
 		if err != nil {
 			return nil, err
 		}
+
 		res.PaymentID = outportRes.PaymentID
 	}
 
@@ -77,14 +84,17 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 			OrderID:     req.OrderID,
 			TotalAmount: req.TotalAmount,
 		})
+
 		if err != nil {
 			return nil, err
 		}
+
 		paymentToStored = payment
 	}
 
 	{
 		err := paymentToStored.AddPaymentStatus(model.WaitingPaymentStatus)
+
 		if err != nil {
 			return nil, err
 		}
@@ -94,6 +104,7 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 		_, err := r.gateway.SavePayment(ctx, port.SavePaymentRequest{
 			Payment: paymentToStored,
 		})
+
 		if err != nil {
 			return nil, err
 		}

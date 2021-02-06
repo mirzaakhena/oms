@@ -10,7 +10,7 @@ type User struct {
 	Status      string // NOT_VERIFIED | ACTIVE | SUSPENDED
 }
 
-func (u *User) ValidateActivation() error {
+func (u *User) ValidateUserAbilityToPay() error {
 	if u.Status != "ACTIVE" {
 		return UserIsNotActive
 	}

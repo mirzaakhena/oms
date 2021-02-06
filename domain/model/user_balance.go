@@ -41,7 +41,7 @@ type DeductedUserBalanceRequest struct {
 	Description     string
 }
 
-func (u *UserBalance) ValidatePaymentBalance(amount float64) error {
+func (u *UserBalance) ValidatePaymentBalanceIsEnough(amount float64) error {
 	if u.Balance-amount < 0 {
 		return BalanceIsNotEnoughError
 	}

@@ -29,9 +29,11 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 		resOutport, err := r.gateway.GenerateOrderID(ctx, port.GenerateOrderIDRequest{ //
 			OutletCode: req.OutletCode,
 		})
+
 		if err != nil {
 			return nil, err
 		}
+
 		res.OrderID = resOutport.OrderID
 	}
 
@@ -58,14 +60,17 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 				MenuItemCode: orderItem.MenuItemCode,
 				Quantity:     orderItem.Quantity,
 			})
+
 			if err != nil {
 				return nil, err
 			}
+
 		}
 	}
 
 	{
 		err := orderToSave.ValidateOrderItem()
+
 		if err != nil {
 			return nil, err
 		}
@@ -98,6 +103,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 		_, err := r.gateway.SaveOrder(ctx, port.SaveOrderRequest{ //
 			Order: orderToSave,
 		})
+
 		if err != nil {
 			return nil, err
 		}
@@ -106,9 +112,11 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 	var orderFinihNotifyURL string
 	{
 		outportRes, err := r.gateway.GetOrderFinishNotifyURL(ctx, port.GetOrderFinishNotifyURLRequest{})
+
 		if err != nil {
 			return nil, err
 		}
+
 		orderFinihNotifyURL = outportRes.OrderFinishNotifyURL
 	}
 
