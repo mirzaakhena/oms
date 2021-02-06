@@ -40,6 +40,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 	var orderToSave *model.Order
 	{
 		order, err := model.NewOrder(model.OrderRequest{
+			Date:          req.Date,
 			OrderID:       res.OrderID,
 			OutletCode:    req.OutletCode,
 			PhoneNumber:   req.PhoneNumber,

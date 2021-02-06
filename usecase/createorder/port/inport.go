@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 )
 
 // CreateOrderInport ...
@@ -11,6 +12,7 @@ type CreateOrderInport interface {
 
 // CreateOrderRequest ...
 type CreateOrderRequest struct {
+	Date          time.Time
 	OutletCode    string
 	PhoneNumber   string
 	TableNumber   string

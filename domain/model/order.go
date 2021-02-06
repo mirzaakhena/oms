@@ -38,7 +38,7 @@ func NewOrder(req OrderRequest) (*Order, error) {
 	}
 
 	var order Order
-	order.Date = time.Now()
+	order.Date = req.Date
 	order.ID = req.OrderID
 	order.OutletCode = req.OutletCode
 	order.PaymentMethod = req.PaymentMethod
@@ -51,7 +51,7 @@ func NewOrder(req OrderRequest) (*Order, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return &order, nil
 }
 
 func (o *Order) ValidateOrderItem() error {
@@ -72,7 +72,6 @@ func (o *Order) AddOrderItem(req OrderItemRequest) error {
 	}
 
 	o.OrderLine = append(o.OrderLine, &OrderItem{
-		Order:        o,
 		MenuItemCode: req.MenuItemCode,
 		Quantity:     req.Quantity,
 	})
@@ -82,6 +81,7 @@ func (o *Order) AddOrderItem(req OrderItemRequest) error {
 
 type OrderRequest struct {
 	OrderID       string
+	Date          time.Time
 	OutletCode    string
 	PhoneNumber   string
 	TableNumber   string
@@ -116,9 +116,7 @@ func (o *Order) AddOrderStatus(newStatus OrderStatusType) error {
 	}
 
 	o.OrderStatuses = append(o.OrderStatuses, &OrderStatus{
-		Order:  o,
-		Date:   time.Now(),
-		Status: string(newStatus),
+		Status: newStatus,
 	})
 	return nil
 }

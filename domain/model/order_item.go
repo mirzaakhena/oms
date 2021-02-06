@@ -3,7 +3,6 @@ package model
 import "github.com/mirzaakhena/oms/domain"
 
 type OrderItem struct {
-	Order        *Order
 	MenuItemCode string
 	Quantity     int
 }

@@ -1,15 +1,11 @@
 package model
 
 import (
-	"time"
-
 	"github.com/mirzaakhena/oms/domain"
 )
 
 type OrderStatus struct {
-	Order  *Order
-	Date   time.Time
-	Status string // INIT | PAID | PREPARE | CANCEL
+	Status OrderStatusType // INIT | PAID | PREPARE | CANCEL
 }
 
 type OrderStatusType string

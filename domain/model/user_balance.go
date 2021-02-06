@@ -26,7 +26,7 @@ func NewDeductedUserBalance(req DeductedUserBalanceRequest) (*UserBalance, error
 	}
 
 	return &UserBalance{
-		Date:        time.Now(),
+		Date:        req.Date,
 		User:        req.User,
 		Amount:      req.Amount,
 		Balance:     newBalance,
@@ -37,6 +37,7 @@ func NewDeductedUserBalance(req DeductedUserBalanceRequest) (*UserBalance, error
 type DeductedUserBalanceRequest struct {
 	LastUserBalance *UserBalance
 	User            *User
+	Date            time.Time
 	Amount          float64
 	Description     string
 }

@@ -8,6 +8,7 @@ import (
 
 type Payment struct {
 	ID                   string
+	Date                 time.Time
 	PhoneNumber          string
 	OrderID              string
 	TotalAmount          float64
@@ -31,6 +32,7 @@ func NewPayment(req PaymentRequest) (*Payment, error) {
 
 	payment := &Payment{
 		ID:                   req.ID,
+		Date:                 req.Date,
 		PhoneNumber:          req.PhoneNumber,
 		OrderID:              req.OrderID,
 		TotalAmount:          req.TotalAmount,
@@ -65,9 +67,7 @@ func (u *Payment) AddPaymentStatus(newStatus PaymentStatusType) error {
 	}
 
 	u.PaymentStatuses = append(u.PaymentStatuses, &PaymentStatus{
-		Payment: u,
-		Status:  PaymentStatusType(newStatus),
-		Date:    time.Now(),
+		Status: PaymentStatusType(newStatus),
 	})
 
 	return nil
@@ -75,6 +75,7 @@ func (u *Payment) AddPaymentStatus(newStatus PaymentStatusType) error {
 
 type PaymentRequest struct {
 	ID                   string
+	Date                 time.Time
 	PhoneNumber          string
 	OrderID              string
 	TotalAmount          float64

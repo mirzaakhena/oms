@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"github.com/mirzaakhena/oms/domain"
 )
 
@@ -16,14 +14,11 @@ const (
 )
 
 type PaymentStatus struct {
-	Payment *Payment          //
-	Status  PaymentStatusType // WAITING | PAID | FAIL | EXPIRED
-	Date    time.Time         //
+	Status PaymentStatusType // WAITING | PAID | FAIL | EXPIRED
 }
 
 type PaymentStatusRequest struct {
-	Payment *Payment
-	Status  string
+	Status string
 }
 
 const (
