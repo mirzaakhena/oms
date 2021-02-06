@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mirzaakhena/oms/domain"
@@ -57,9 +58,11 @@ func (u *Payment) AddPaymentStatus(newStatus PaymentStatusType) error {
 	lastPaymentStatus := u.GetCurrentPaymentStatus()
 	if lastPaymentStatus != nil {
 
-		toPaid := lastPaymentStatus.Status == "WAIT" && newStatus == "PAID"
-		toExpired := lastPaymentStatus.Status == "WAIT" && newStatus == "EXPIRED"
-		toFail := lastPaymentStatus.Status == "WAIT" && newStatus == "FAIL"
+		toPaid := lastPaymentStatus.Status == WaitingPaymentStatus && newStatus == PaidPaymentStatus
+		toExpired := lastPaymentStatus.Status == WaitingPaymentStatus && newStatus == ExpiredPaymentStatus
+		toFail := lastPaymentStatus.Status == WaitingPaymentStatus && newStatus == FailPaymentStatus
+
+		fmt.Printf(">>>>>>>>>>>>>>>> %v %v\n", lastPaymentStatus.Status, newStatus)
 
 		if !toPaid && !toExpired && !toFail {
 			return NotAllowedPaymentStatusTransitionError

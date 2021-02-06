@@ -79,10 +79,12 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 	var paymentToStored *model.Payment
 	{
 		payment, err := model.NewPayment(model.PaymentRequest{
-			ID:          res.PaymentID,
-			PhoneNumber: req.PhoneNumber,
-			OrderID:     req.OrderID,
-			TotalAmount: req.TotalAmount,
+			ID:                   res.PaymentID,
+			PhoneNumber:          req.PhoneNumber,
+			OrderID:              req.OrderID,
+			TotalAmount:          req.TotalAmount,
+			Date:                 req.Date,
+			OrderFinishNotifyURL: req.OrderFinishNotifyURL,
 		})
 
 		if err != nil {
@@ -90,14 +92,6 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 		}
 
 		paymentToStored = payment
-	}
-
-	{
-		err := paymentToStored.AddPaymentStatus(model.WaitingPaymentStatus)
-
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	{
