@@ -25,23 +25,25 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 
 	var res port.CreateOrderResponse
 
+	var sequenceIndex int
 	{
-		resOutport, err := r.gateway.GenerateOrderID(ctx, port.GenerateOrderIDRequest{ //
+		resOutport, err := r.gateway.GetLatestIndexID(ctx, port.GetLatestIndexIDRequest{ //
 			OutletCode: req.OutletCode,
+			Date:       req.Date,
 		})
 
 		if err != nil {
 			return nil, err
 		}
 
-		res.OrderID = resOutport.OrderID
+		sequenceIndex = resOutport.Index
 	}
 
 	var orderToSave *model.Order
 	{
 		order, err := model.NewOrder(model.OrderRequest{
 			Date:          req.Date,
-			OrderID:       res.OrderID,
+			SequenceIndex: sequenceIndex,
 			OutletCode:    req.OutletCode,
 			PhoneNumber:   req.PhoneNumber,
 			TableNumber:   req.TableNumber,
@@ -53,6 +55,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 		}
 
 		orderToSave = order
+		res.OrderID = order.ID.String()
 	}
 
 	{
@@ -110,7 +113,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 		}
 	}
 
-	var orderFinihNotifyURL string
+	var orderFinishNotifyURL string
 	{
 		outportRes, err := r.gateway.GetOrderFinishNotifyURL(ctx, port.GetOrderFinishNotifyURLRequest{})
 
@@ -118,7 +121,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 			return nil, err
 		}
 
-		orderFinihNotifyURL = outportRes.OrderFinishNotifyURL
+		orderFinishNotifyURL = outportRes.OrderFinishNotifyURL
 	}
 
 	{
@@ -126,7 +129,7 @@ func (r *createOrderInteractor) Execute(ctx context.Context, req port.CreateOrde
 			PhoneNumber:          req.PhoneNumber,
 			TotalAmount:          totalPrice,
 			OrderID:              res.OrderID,
-			OrderFinishNotifyURL: orderFinihNotifyURL,
+			OrderFinishNotifyURL: orderFinishNotifyURL,
 		})
 
 		if err != nil {

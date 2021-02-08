@@ -34,29 +34,6 @@ func (_m *CreateOrderOutport) CreatePayment(ctx context.Context, req port.Create
 	return r0, r1
 }
 
-// GenerateOrderID provides a mock function with given fields: ctx, req
-func (_m *CreateOrderOutport) GenerateOrderID(ctx context.Context, req port.GenerateOrderIDRequest) (*port.GenerateOrderIDResponse, error) {
-	ret := _m.Called(ctx, req)
-
-	var r0 *port.GenerateOrderIDResponse
-	if rf, ok := ret.Get(0).(func(context.Context, port.GenerateOrderIDRequest) *port.GenerateOrderIDResponse); ok {
-		r0 = rf(ctx, req)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*port.GenerateOrderIDResponse)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, port.GenerateOrderIDRequest) error); ok {
-		r1 = rf(ctx, req)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetAllMenuItemPrice provides a mock function with given fields: ctx, req
 func (_m *CreateOrderOutport) GetAllMenuItemPrice(ctx context.Context, req port.GetAllMenuItemPriceRequest) (*port.GetAllMenuItemPriceResponse, error) {
 	ret := _m.Called(ctx, req)
@@ -72,6 +49,29 @@ func (_m *CreateOrderOutport) GetAllMenuItemPrice(ctx context.Context, req port.
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, port.GetAllMenuItemPriceRequest) error); ok {
+		r1 = rf(ctx, req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetLatestIndexID provides a mock function with given fields: ctx, req
+func (_m *CreateOrderOutport) GetLatestIndexID(ctx context.Context, req port.GetLatestIndexIDRequest) (*port.GetLatestIndexIDResponse, error) {
+	ret := _m.Called(ctx, req)
+
+	var r0 *port.GetLatestIndexIDResponse
+	if rf, ok := ret.Get(0).(func(context.Context, port.GetLatestIndexIDRequest) *port.GetLatestIndexIDResponse); ok {
+		r0 = rf(ctx, req)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*port.GetLatestIndexIDResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, port.GetLatestIndexIDRequest) error); ok {
 		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)

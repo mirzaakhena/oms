@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"github.com/mirzaakhena/oms/domain/model"
 )
@@ -11,7 +12,7 @@ type CreateOrderOutport interface {
 	SaveOrder(ctx context.Context, req SaveOrderRequest) (*SaveOrderResponse, error)
 	CreatePayment(ctx context.Context, req CreatePaymentRequest) (*CreatePaymentResponse, error)
 	GetAllMenuItemPrice(ctx context.Context, req GetAllMenuItemPriceRequest) (*GetAllMenuItemPriceResponse, error)
-	GenerateOrderID(ctx context.Context, req GenerateOrderIDRequest) (*GenerateOrderIDResponse, error)
+	GetLatestIndexID(ctx context.Context, req GetLatestIndexIDRequest) (*GetLatestIndexIDResponse, error)
 	GetOrderFinishNotifyURL(ctx context.Context, req GetOrderFinishNotifyURLRequest) (*GetOrderFinishNotifyURLResponse, error)
 }
 
@@ -47,14 +48,15 @@ type GetAllMenuItemPriceResponse struct {
 	MenuItemWithPrices map[string]float64
 }
 
-// GenerateOrderIDRequest ...
-type GenerateOrderIDRequest struct {
+// GetLatestIndexIDRequest ...
+type GetLatestIndexIDRequest struct {
 	OutletCode string
+	Date       time.Time
 }
 
-// GenerateOrderIDResponse ...
-type GenerateOrderIDResponse struct {
-	OrderID string
+// GetLatestIndexIDResponse ...
+type GetLatestIndexIDResponse struct {
+	Index int
 }
 
 // GetOrderFinishNotifyURLRequest ...

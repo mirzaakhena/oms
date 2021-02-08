@@ -15,7 +15,7 @@ func Test_CreateOrder_Normal(t *testing.T) {
 
 	ctx := context.Background()
 
-	date := time.Date(2021, time.January, 1, 12, 12, 12, 12, time.UTC)
+	date := time.Date(2021, time.December, 11, 12, 12, 12, 12, time.UTC)
 
 	outputPort := mocks.CreateOrderOutport{}
 	{
@@ -26,7 +26,7 @@ func Test_CreateOrder_Normal(t *testing.T) {
 				OutletCode:    "0208",
 				PhoneNumber:   "08123",
 				TableNumber:   "B32",
-				PaymentMethod: "DANA",
+				PaymentMethod: "DNA",
 				OrderLine: []*model.OrderItem{
 					{MenuItemCode: "101", Quantity: 2},
 					{MenuItemCode: "102", Quantity: 3},
@@ -59,11 +59,12 @@ func Test_CreateOrder_Normal(t *testing.T) {
 		}, nil)
 	}
 	{
-		call := outputPort.On("GenerateOrderID", ctx, port.GenerateOrderIDRequest{ //
+		call := outputPort.On("GetLatestIndexID", ctx, port.GetLatestIndexIDRequest{ //
 			OutletCode: "0208",
+			Date:       date,
 		})
-		call.Return(&port.GenerateOrderIDResponse{ //
-			OrderID: "02081211N210002",
+		call.Return(&port.GetLatestIndexIDResponse{ //
+			Index: 2,
 		}, nil)
 	}
 	{
@@ -79,7 +80,7 @@ func Test_CreateOrder_Normal(t *testing.T) {
 		OutletCode:    "0208",
 		PhoneNumber:   "08123",
 		TableNumber:   "B32",
-		PaymentMethod: "DANA",
+		PaymentMethod: "DNA",
 		OrderLine: []port.OrderItem{
 			{MenuItemCode: "101", Quantity: 2},
 			{MenuItemCode: "102", Quantity: 3},

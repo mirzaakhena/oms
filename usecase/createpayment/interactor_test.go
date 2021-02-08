@@ -56,6 +56,9 @@ func Test_CreatePayment_Normal(t *testing.T) {
 		}, nil)
 	}
 	{
+
+		paymentStatus := model.WaitingPaymentStatus
+
 		call := outputPort.On("SavePayment", ctx, port.SavePaymentRequest{ //
 			Payment: &model.Payment{
 				ID:                   "4567",
@@ -65,7 +68,7 @@ func Test_CreatePayment_Normal(t *testing.T) {
 				TotalAmount:          500,
 				OrderFinishNotifyURL: "https://notifyme.com",
 				PaymentStatuses: []*model.PaymentStatus{
-					{Status: model.WaitingPaymentStatus},
+					&paymentStatus,
 				},
 			},
 		})

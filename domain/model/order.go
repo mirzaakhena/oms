@@ -9,12 +9,12 @@ import (
 )
 
 type Order struct {
-	ID            string
+	ID            OrderID
 	Date          time.Time
 	OutletCode    string
 	PhoneNumber   string
 	TableNumber   string
-	PaymentMethod string
+	PaymentMethod PaymentMethod
 	OrderLine     []*OrderItem
 	OrderStatuses []*OrderStatus
 }
@@ -37,11 +37,35 @@ func NewOrder(req OrderRequest) (*Order, error) {
 		return nil, fmt.Errorf("PaymentMethod must not blank")
 	}
 
+	var resultOrderID OrderID
+	{
+
+		orderID, err := NewOrderID(OrderIDRequest{
+			OutletCode:    req.OutletCode,
+			Date:          req.Date,
+			PaymentMethod: PaymentMethod(req.PaymentMethod),
+			Sequence:      req.SequenceIndex,
+		})
+		if err != nil {
+			return nil, err
+		}
+		resultOrderID = orderID
+	}
+
+	var resultPaymentMethod PaymentMethod
+	{
+		paymentMethod, err := NewPaymentMethod(req.PaymentMethod)
+		if err != nil {
+			return nil, err
+		}
+		resultPaymentMethod = paymentMethod
+	}
+
 	var order Order
 	order.Date = req.Date
-	order.ID = req.OrderID
+	order.ID = resultOrderID
 	order.OutletCode = req.OutletCode
-	order.PaymentMethod = req.PaymentMethod
+	order.PaymentMethod = resultPaymentMethod
 	order.PhoneNumber = req.PhoneNumber
 	order.TableNumber = req.TableNumber
 
@@ -80,7 +104,7 @@ func (o *Order) AddOrderItem(req OrderItemRequest) error {
 }
 
 type OrderRequest struct {
-	OrderID       string
+	SequenceIndex int
 	Date          time.Time
 	OutletCode    string
 	PhoneNumber   string

@@ -1,0 +1,54 @@
+@startuml Something
+
+autonumber
+actor Customer
+participant Apps
+participant MenuService 
+participant OrderService
+participant PaymentService
+participant UserService
+participant BalanceService
+
+Customer -> Apps : Scan QR code
+Apps -> Apps : Extract OutletCode from QR code
+Apps -> MenuService : Request Menu by OutletCode
+MenuService -> MenuService : Load Menu from Cache
+MenuService -->  Apps : Menu with code and price
+Apps --> Customer : Show Menu
+
+...
+
+Customer -> Apps : Click Submit Order Button
+Apps -> OrderService : Create Order
+OrderService -> OrderService : Load Menu from Cache
+OrderService -> OrderService : Calculating menu price
+OrderService -> OrderService : Save Order to Database
+OrderService -> PaymentService : Create Payment
+PaymentService -> UserService : Check User Status
+UserService --> PaymentService :  
+PaymentService -> BalanceService : Check balance
+BalanceService --> PaymentService : 
+PaymentService -> PaymentService : Create Payment to Database
+PaymentService --> OrderService : Return Payment ID
+OrderService -> OrderService : Store Payment ID
+OrderService --> Apps : Return Payment ID
+Apps -> PaymentService : Open Payment Channel page 
+PaymentService --> Apps : Return Payment Channel page 
+Apps --> Customer : Show Payment Channel page 
+
+...
+
+Customer -> Apps : Do the Payment
+Apps -> PaymentService : Submit the Payment
+PaymentService -> PaymentService : Validating, check balance
+PaymentService -> PaymentService : Cut the balance
+PaymentService --> Apps : Return Success Payment Page
+Apps --> Customer : See Success Payment Page
+
+...
+
+PaymentService -> OrderService : Notify Payment is done
+OrderService -> OrderService : Continue Order Sequence
+OrderService --> PaymentService: Return OK
+
+@enduml

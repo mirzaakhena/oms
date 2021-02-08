@@ -3,7 +3,6 @@ package master
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/mirzaakhena/oms/domain/model"
 	"github.com/mirzaakhena/oms/infrastructure/log"
 	"github.com/mirzaakhena/oms/infrastructure/util"
@@ -105,12 +104,12 @@ func (r *createOrder) GetAllMenuItemPrice(ctx context.Context, req port.GetAllMe
 	return &res, nil
 }
 
-// GenerateOrderID ...
-func (r *createOrder) GenerateOrderID(ctx context.Context, req port.GenerateOrderIDRequest) (*port.GenerateOrderIDResponse, error) {
+// GetLatestIndexID ...
+func (r *createOrder) GetLatestIndexID(ctx context.Context, req port.GetLatestIndexIDRequest) (*port.GetLatestIndexIDResponse, error) {
 	log.Info(ctx, "Request  %v", util.ToJSON(req))
 
-	var res port.GenerateOrderIDResponse
-	res.OrderID = uuid.NewString()
+	var res port.GetLatestIndexIDResponse
+	res.Index = 2
 
 	log.Info(ctx, "Response %v", util.ToJSON(res))
 	return &res, nil

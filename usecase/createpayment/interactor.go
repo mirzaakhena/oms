@@ -39,7 +39,7 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 	}
 
 	{
-		err := user.ValidateUserAbilityToPay()
+		err := user.ValidateUserStatusToUseBalance()
 
 		if err != nil {
 			return nil, err
@@ -61,6 +61,7 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 
 	{
 		err := latestBalance.ValidatePaymentBalanceIsEnough(req.TotalAmount)
+
 		if err != nil {
 			return nil, err
 		}
