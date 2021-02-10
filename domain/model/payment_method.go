@@ -9,19 +9,19 @@ import (
 type PaymentMethodEnum string
 
 const (
-	DANAPaymentMethodEnum  = PaymentMethodEnum("DNA")
-	GOPAYPaymentMethodEnum = PaymentMethodEnum("GPY")
-	OVOPaymentMethodEnum   = PaymentMethodEnum("OVO")
+	DANAPaymentMethodEnum  PaymentMethodEnum = "DNA"
+	GOPAYPaymentMethodEnum PaymentMethodEnum = "GPY"
+	OVOPaymentMethodEnum   PaymentMethodEnum = "OVO"
 )
 
-type paymentMethodDetail struct {
-	Code string
+type enumDetail struct {
+	OrderIDCode string
 }
 
-var enumMapStructure = map[PaymentMethodEnum]paymentMethodDetail{
-	DANAPaymentMethodEnum:  {Code: "N"},
-	GOPAYPaymentMethodEnum: {Code: "G"},
-	OVOPaymentMethodEnum:   {Code: "B"},
+var enumMapStructure = map[PaymentMethodEnum]enumDetail{
+	DANAPaymentMethodEnum:  {OrderIDCode: "N"},
+	GOPAYPaymentMethodEnum: {OrderIDCode: "G"},
+	OVOPaymentMethodEnum:   {OrderIDCode: "B"},
 }
 
 func NewPaymentMethodEnum(name string) (PaymentMethodEnum, error) {
@@ -36,5 +36,5 @@ func NewPaymentMethodEnum(name string) (PaymentMethodEnum, error) {
 }
 
 func (r PaymentMethodEnum) OrderIDCode() string {
-	return enumMapStructure[r].Code
+	return enumMapStructure[r].OrderIDCode
 }

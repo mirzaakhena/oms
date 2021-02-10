@@ -9,11 +9,11 @@ import (
 type PaymentStateEnum string
 
 const (
-	WaitingPaymentState   = PaymentStateEnum("WAITING")
-	PaidPaymentState      = PaymentStateEnum("PAID")
-	ExpiredPaymentState   = PaymentStateEnum("EXPIRED")
-	FailPaymentState      = PaymentStateEnum("FAIL")
-	CancelledPaymentState = PaymentStateEnum("CANCELLED")
+	WaitingPaymentState   PaymentStateEnum = "WAITING"
+	PaidPaymentState      PaymentStateEnum = "PAID"
+	ExpiredPaymentState   PaymentStateEnum = "EXPIRED"
+	FailPaymentState      PaymentStateEnum = "FAIL"
+	CancelledPaymentState PaymentStateEnum = "CANCELLED"
 )
 
 type PaymentState struct {
@@ -70,7 +70,7 @@ func NewPaymentState(req PaymentStateRequest) *PaymentState {
 	}
 }
 
-func (r PaymentState) TransitTo(req PaymentStateRequest) (*PaymentState, error) {
+func (r *PaymentState) TransitTo(req PaymentStateRequest) (*PaymentState, error) {
 
 	validateTransitionFunc := paymentStateRule[r.State]
 
