@@ -25,6 +25,27 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 
 	var res port.CreatePaymentResponse
 
+	// var latestBalance model.UserBalance
+	// {
+	// 	outportRes, err := r.gateway.GetLatestUserBalance(ctx, port.GetLatestUserBalanceRequest{ //
+	// 		PhoneNumber: req.PhoneNumber,
+	// 	})
+
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	latestBalance = outportRes.UserBalance
+	// }
+
+	// {
+	// 	err := latestBalance.ValidatePaymentBalanceIsEnough(req.TotalAmount)
+
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+
 	var user model.User
 	{
 		outportRes, err := r.gateway.GetUser(ctx, port.GetUserRequest{
@@ -39,28 +60,7 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 	}
 
 	{
-		err := user.ValidateUserStatusToUseBalance()
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	var latestBalance model.UserBalance
-	{
-		outportRes, err := r.gateway.GetLatestUserBalance(ctx, port.GetLatestUserBalanceRequest{ //
-			PhoneNumber: req.PhoneNumber,
-		})
-
-		if err != nil {
-			return nil, err
-		}
-
-		latestBalance = outportRes.UserBalance
-	}
-
-	{
-		err := latestBalance.ValidatePaymentBalanceIsEnough(req.TotalAmount)
+		err := user.ValidateUserStatus()
 
 		if err != nil {
 			return nil, err
@@ -77,14 +77,28 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 		res.PaymentID = outportRes.PaymentID
 	}
 
-	var paymentToStored *model.Payment
+	var lastPayment *model.Payment
+	{
+		outportRes, err := r.gateway.GetLastPayment(ctx, port.GetLastPaymentRequest{ //
+			PhoneNumber: req.PhoneNumber,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		lastPayment = outportRes.LastPayment
+	}
+
+	var paymentToSaved *model.Payment
 	{
 		payment, err := model.NewPayment(model.PaymentRequest{
+			LastPayment:          lastPayment,
 			ID:                   res.PaymentID,
+			Date:                 req.Date,
 			PhoneNumber:          req.PhoneNumber,
 			OrderID:              req.OrderID,
 			TotalAmount:          req.TotalAmount,
-			Date:                 req.Date,
 			OrderFinishNotifyURL: req.OrderFinishNotifyURL,
 		})
 
@@ -92,12 +106,12 @@ func (r *createPaymentInteractor) Execute(ctx context.Context, req port.CreatePa
 			return nil, err
 		}
 
-		paymentToStored = payment
+		paymentToSaved = payment
 	}
 
 	{
 		_, err := r.gateway.SavePayment(ctx, port.SavePaymentRequest{
-			Payment: paymentToStored,
+			Payment: paymentToSaved,
 		})
 
 		if err != nil {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mirzaakhena/oms/domain"
+	"github.com/mirzaakhena/oms/shared"
 )
 
 type Order struct {
@@ -16,7 +16,7 @@ type Order struct {
 	TableNumber   string
 	PaymentMethod PaymentMethod
 	OrderLine     []*OrderItem
-	OrderStatuses []*OrderStatus
+	OrderStates   []*OrderState
 }
 
 func NewOrder(req OrderRequest) (*Order, error) {
@@ -69,7 +69,7 @@ func NewOrder(req OrderRequest) (*Order, error) {
 	order.PhoneNumber = req.PhoneNumber
 	order.TableNumber = req.TableNumber
 
-	err := order.AddOrderStatus(InitOrderStatus)
+	err := order.AddOrderStatus(InitOrderState)
 
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func NewOrder(req OrderRequest) (*Order, error) {
 
 func (o *Order) ValidateOrderItem() error {
 	if len(o.OrderLine) == 0 {
-		return OrderlineMustNotEmptyError
+		return shared.OrderlineMustNotEmptyError
 	}
 	return nil
 }
@@ -88,11 +88,11 @@ func (o *Order) ValidateOrderItem() error {
 func (o *Order) AddOrderItem(req OrderItemRequest) error {
 
 	if req.MenuItemCode == "" {
-		return MenuItemCodeMustNotEmptyError
+		return shared.MenuItemCodeMustNotEmptyError
 	}
 
 	if req.Quantity <= 0 {
-		return MenuItemCodeMustNotEmptyError
+		return shared.MenuItemCodeMustNotEmptyError
 	}
 
 	o.OrderLine = append(o.OrderLine, &OrderItem{
@@ -121,41 +121,36 @@ func (o *Order) GetTotalPrice(pricePerMenu func(menuItemCode string) float64) fl
 	return totalAmount
 }
 
-func (o *Order) AddOrderStatus(newStatus OrderStatusType) error {
+func (o *Order) AddOrderStatus(newState OrderStateType) error {
 
-	if newStatus == "" {
-		return OrderStatusMustNotEmptyError
+	if newState == "" {
+		return shared.OrderStateMustNotEmptyError
 	}
 
-	lastOrderStatus := o.GetCurrentOrderStatus()
-	if lastOrderStatus != nil {
+	lastOrderState := o.GetCurrentOrderState()
+	if lastOrderState != nil {
 
-		toPaid := lastOrderStatus.Status == "WAIT" && newStatus == "PAID"
-		toExpired := lastOrderStatus.Status == "WAIT" && newStatus == "EXPIRED"
-		toFail := lastOrderStatus.Status == "WAIT" && newStatus == "FAIL"
+		toPaid := lastOrderState.State == "WAIT" && newState == "PAID"
+		toExpired := lastOrderState.State == "WAIT" && newState == "EXPIRED"
+		toFail := lastOrderState.State == "WAIT" && newState == "FAIL"
 
 		if !toPaid && !toExpired && !toFail {
-			return NotAllowedOrderStatusTransitionError
+			return shared.NotAllowedOrderStateTransitionError
 		}
 	}
 
-	o.OrderStatuses = append(o.OrderStatuses, &OrderStatus{
-		Status: newStatus,
+	o.OrderStates = append(o.OrderStates, &OrderState{
+		State: newState,
 	})
 	return nil
 }
 
-func (o *Order) GetCurrentOrderStatus() *OrderStatus {
+func (o *Order) GetCurrentOrderState() *OrderState {
 
-	lenOrderStatus := len(o.OrderStatuses)
+	lenOrderStatus := len(o.OrderStates)
 	if lenOrderStatus > 0 {
-		return o.OrderStatuses[lenOrderStatus-1]
+		return o.OrderStates[lenOrderStatus-1]
 	}
 
 	return nil
 }
-
-const (
-	MenuItemCodeMustNotEmptyError = domain.ErrorType("Menu Item Code Must Not Empty")
-	QuantityMustNotEmptyError     = domain.ErrorType("Quantity Must Not Empty")
-)

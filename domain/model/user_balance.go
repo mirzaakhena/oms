@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/mirzaakhena/oms/domain"
+	"github.com/mirzaakhena/oms/shared"
 )
 
 type UserBalance struct {
@@ -17,12 +17,12 @@ type UserBalance struct {
 func NewDeductedUserBalance(req DeductedUserBalanceRequest) (*UserBalance, error) {
 
 	if req.Amount <= 0 {
-		return nil, AmountMustGreaterThanZeroError
+		return nil, shared.AmountMustGreaterThanZeroError
 	}
 
 	newBalance := req.LastUserBalance.Balance - req.Amount
 	if newBalance < 0 {
-		return nil, BalanceIsNotEnoughError
+		return nil, shared.BalanceIsNotEnoughError
 	}
 
 	return &UserBalance{
@@ -44,12 +44,7 @@ type DeductedUserBalanceRequest struct {
 
 func (u *UserBalance) ValidatePaymentBalanceIsEnough(amount float64) error {
 	if u.Balance-amount < 0 {
-		return BalanceIsNotEnoughError
+		return shared.BalanceIsNotEnoughError
 	}
 	return nil
 }
-
-const (
-	AmountMustGreaterThanZeroError = domain.ErrorType("Amount Must Greater Than Zero")
-	BalanceIsNotEnoughError        = domain.ErrorType("Balance Is Not Enough")
-)

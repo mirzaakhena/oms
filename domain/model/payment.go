@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/mirzaakhena/oms/domain"
+	"github.com/mirzaakhena/oms/shared"
 )
 
 type Payment struct {
@@ -13,21 +13,31 @@ type Payment struct {
 	OrderID              string
 	TotalAmount          float64
 	OrderFinishNotifyURL string
-	PaymentStatuses      []*PaymentStatus
+	PaymentStates        []*PaymentState
 }
 
 func NewPayment(req PaymentRequest) (*Payment, error) {
 
 	if req.PhoneNumber == "" {
-		return nil, PhoneNumberMustNotEmptyError
+		return nil, shared.PhoneNumberMustNotEmptyError
 	}
 
 	if req.OrderID == "" {
-		return nil, PhoneNumberMustNotEmptyError
+		return nil, shared.PhoneNumberMustNotEmptyError
+	}
+
+	if req.Date.After(time.Now()) {
+		return nil, shared.InvalidDateError
+	}
+
+	if req.LastPayment != nil {
+		if req.LastPayment.Date.After(req.Date) {
+			return nil, shared.InvalidDateError
+		}
 	}
 
 	if req.TotalAmount < 0 {
-		return nil, PhoneNumberMustNotEmptyError
+		return nil, shared.PhoneNumberMustNotEmptyError
 	}
 
 	payment := &Payment{
@@ -39,7 +49,10 @@ func NewPayment(req PaymentRequest) (*Payment, error) {
 		OrderFinishNotifyURL: req.OrderFinishNotifyURL,
 	}
 
-	err := payment.AddPaymentStatus(WaitingPaymentStatus)
+	err := payment.AddPaymentStatus(AddPaymentStateRequest{
+		NewState: WaitingPaymentState,
+		Date:     req.Date,
+	})
 
 	if err != nil {
 		return nil, err
@@ -48,24 +61,28 @@ func NewPayment(req PaymentRequest) (*Payment, error) {
 	return payment, nil
 }
 
-func (u *Payment) AddPaymentStatus(newStatus PaymentStatus) error {
+func (u *Payment) AddPaymentStatus(req AddPaymentStateRequest) error {
 
 	lastPaymentStatus := u.GetCurrentPaymentStatus()
 	if lastPaymentStatus != nil {
 
-		err := lastPaymentStatus.ValidateNextPaymentStatus(PaymentStatusRequest{NewStatus: newStatus})
+		err := lastPaymentStatus.ValidateNextPaymentState(PaymentStateRequest{NewState: req.NewState})
 
 		if err != nil {
 			return err
 		}
 	}
 
-	u.PaymentStatuses = append(u.PaymentStatuses, &newStatus)
+	u.PaymentStates = append(u.PaymentStates, &PaymentState{
+		State: req.NewState,
+		Date:  req.Date,
+	})
 
 	return nil
 }
 
 type PaymentRequest struct {
+	LastPayment          *Payment
 	ID                   string
 	Date                 time.Time
 	PhoneNumber          string
@@ -74,15 +91,15 @@ type PaymentRequest struct {
 	OrderFinishNotifyURL string
 }
 
-func (u *Payment) GetCurrentPaymentStatus() *PaymentStatus {
-	lenPaymentStatus := len(u.PaymentStatuses)
+func (u *Payment) GetCurrentPaymentStatus() *PaymentState {
+	lenPaymentStatus := len(u.PaymentStates)
 	if lenPaymentStatus > 0 {
-		return u.PaymentStatuses[lenPaymentStatus-1]
+		return u.PaymentStates[lenPaymentStatus-1]
 	}
 	return nil
 }
 
-const (
-	PhoneNumberMustNotEmptyError = domain.ErrorType("Phone Number Must Not Empty")
-	OrderIDMustNotEmptyError     = domain.ErrorType("Order ID Must Not Empty")
-)
+type AddPaymentStateRequest struct {
+	NewState PaymentStateEnum
+	Date     time.Time
+}

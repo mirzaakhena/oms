@@ -34,20 +34,29 @@ func Test_CreatePayment_Normal(t *testing.T) {
 			User: user,
 		}, nil)
 	}
+
 	{
-		call := outputPort.On("GetLatestUserBalance", ctx, port.GetLatestUserBalanceRequest{ //
+		call := outputPort.On("GetLastPayment", ctx, port.GetLastPaymentRequest{ //
 			PhoneNumber: "08123",
 		})
-		call.Return(&port.GetLatestUserBalanceResponse{ //
-			UserBalance: model.UserBalance{
-				User:        &user,
-				Date:        date,
-				Amount:      10000,
-				Balance:     50000,
-				Description: "12345",
-			},
+		call.Return(&port.GetLastPaymentResponse{ //
+			LastPayment: nil,
 		}, nil)
 	}
+	// {
+	// 	call := outputPort.On("GetLatestUserBalance", ctx, port.GetLatestUserBalanceRequest{ //
+	// 		PhoneNumber: "08123",
+	// 	})
+	// 	call.Return(&port.GetLatestUserBalanceResponse{ //
+	// 		UserBalance: model.UserBalance{
+	// 			User:        &user,
+	// 			Date:        date,
+	// 			Amount:      10000,
+	// 			Balance:     50000,
+	// 			Description: "12345",
+	// 		},
+	// 	}, nil)
+	// }
 	{
 		call := outputPort.On("GenerateID", ctx, port.GenerateIDRequest{ //
 		})
@@ -57,8 +66,6 @@ func Test_CreatePayment_Normal(t *testing.T) {
 	}
 	{
 
-		paymentStatus := model.WaitingPaymentStatus
-
 		call := outputPort.On("SavePayment", ctx, port.SavePaymentRequest{ //
 			Payment: &model.Payment{
 				ID:                   "4567",
@@ -67,8 +74,8 @@ func Test_CreatePayment_Normal(t *testing.T) {
 				OrderID:              "12345",
 				TotalAmount:          500,
 				OrderFinishNotifyURL: "https://notifyme.com",
-				PaymentStatuses: []*model.PaymentStatus{
-					&paymentStatus,
+				PaymentStates: []*model.PaymentState{
+					{State: model.WaitingPaymentState, Date: date},
 				},
 			},
 		})

@@ -31,8 +31,8 @@ func Test_CreateOrder_Normal(t *testing.T) {
 					{MenuItemCode: "101", Quantity: 2},
 					{MenuItemCode: "102", Quantity: 3},
 				},
-				OrderStatuses: []*model.OrderStatus{
-					{Status: model.InitOrderStatus},
+				OrderStates: []*model.OrderState{
+					{State: model.InitOrderState},
 				},
 			},
 		})

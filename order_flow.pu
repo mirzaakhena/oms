@@ -8,6 +8,7 @@ participant OrderService
 participant PaymentService
 participant UserService
 participant BalanceService
+participant SchedulerService
 
 Customer -> Apps : Scan QR code
 Apps -> Apps : Extract OutletCode from QR code
@@ -22,17 +23,23 @@ Customer -> Apps : Click Submit Order Button
 Apps -> OrderService : Create Order
 OrderService -> OrderService : Load Menu from Cache
 OrderService -> OrderService : Calculating menu price
-OrderService -> OrderService : Save Order to Database
+OrderService -> OrderService : Save Order to DB with status ORDER_CREATED
 OrderService -> PaymentService : Create Payment
-PaymentService -> UserService : Check User Status
-UserService --> PaymentService :  
-PaymentService -> BalanceService : Check balance
-BalanceService --> PaymentService : 
-PaymentService -> PaymentService : Create Payment to Database
+PaymentService -> UserService : Get User
+UserService --> PaymentService : 
+PaymentService -> PaymentService : Retrieve last Payment
+PaymentService -> PaymentService : Create Payment to DB with status PAYMENT_CREATED
 PaymentService --> OrderService : Return Payment ID
-OrderService -> OrderService : Store Payment ID
+OrderService -> OrderService : Update status to PAYMENT_CREATED
+OrderService -> SchedulerService : Start Expired Payment Scheduler Service
+SchedulerService --> OrderService :
 OrderService --> Apps : Return Payment ID
-Apps -> PaymentService : Open Payment Channel page 
+Apps -> PaymentService : Open Payment Channel page with PaymentID and PhoneNumber as Parameter
+PaymentService -> UserService : Get User
+UserService --> PaymentService :
+PaymentService -> BalanceService : Get User Balance
+BalanceService --> PaymentService : 
+PaymentService -> PaymentService : Retrieve Last Payment with PaymentID
 PaymentService --> Apps : Return Payment Channel page 
 Apps --> Customer : Show Payment Channel page 
 
@@ -40,15 +47,16 @@ Apps --> Customer : Show Payment Channel page
 
 Customer -> Apps : Do the Payment
 Apps -> PaymentService : Submit the Payment
-PaymentService -> PaymentService : Validating, check balance
-PaymentService -> PaymentService : Cut the balance
+PaymentService -> UserService : Get User
+UserService --> PaymentService :
+PaymentService -> BalanceService : Deduct the balance
+BalanceService --> PaymentService :
+PaymentService -> PaymentService : Update Status to PAID
 PaymentService --> Apps : Return Success Payment Page
 Apps --> Customer : See Success Payment Page
-
-...
-
 PaymentService -> OrderService : Notify Payment is done
-OrderService -> OrderService : Continue Order Sequence
+OrderService -> OrderService : Update status to PAID
+OrderService ->  : Continue Order Sequence
 OrderService --> PaymentService: Return OK
 
 @enduml

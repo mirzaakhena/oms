@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mirzaakhena/oms/domain"
+	"github.com/mirzaakhena/oms/shared"
 )
 
 type OrderID string
@@ -12,15 +12,15 @@ type OrderID string
 func NewOrderID(req OrderIDRequest) (OrderID, error) {
 
 	if len(req.OutletCode) != 4 {
-		return "", OrderIDLengthMust4Char
+		return "", shared.OrderIDLengthMust4Char
 	}
 
 	if req.Sequence == 0 {
-		return "", SequenceMustGreaterThanZero
+		return "", shared.SequenceMustGreaterThanZero
 	}
 
 	if req.Sequence > 9999 {
-		return "", SequenceOutOfBound
+		return "", shared.SequenceOutOfBound
 	}
 
 	s := fmt.Sprintf("%s%s%s%s%s%04d",
@@ -45,9 +45,3 @@ type OrderIDRequest struct {
 	PaymentMethod PaymentMethod
 	Sequence      int
 }
-
-const (
-	OrderIDLengthMust4Char      = domain.ErrorType("OrderID must 4 fix char")
-	SequenceMustGreaterThanZero = domain.ErrorType("SequenceMustGreaterThanZero")
-	SequenceOutOfBound          = domain.ErrorType("SequenceOutOfBound")
-)

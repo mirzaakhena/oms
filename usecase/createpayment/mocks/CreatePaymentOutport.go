@@ -34,21 +34,21 @@ func (_m *CreatePaymentOutport) GenerateID(ctx context.Context, req port.Generat
 	return r0, r1
 }
 
-// GetLatestUserBalance provides a mock function with given fields: ctx, req
-func (_m *CreatePaymentOutport) GetLatestUserBalance(ctx context.Context, req port.GetLatestUserBalanceRequest) (*port.GetLatestUserBalanceResponse, error) {
+// GetLastPayment provides a mock function with given fields: ctx, req
+func (_m *CreatePaymentOutport) GetLastPayment(ctx context.Context, req port.GetLastPaymentRequest) (*port.GetLastPaymentResponse, error) {
 	ret := _m.Called(ctx, req)
 
-	var r0 *port.GetLatestUserBalanceResponse
-	if rf, ok := ret.Get(0).(func(context.Context, port.GetLatestUserBalanceRequest) *port.GetLatestUserBalanceResponse); ok {
+	var r0 *port.GetLastPaymentResponse
+	if rf, ok := ret.Get(0).(func(context.Context, port.GetLastPaymentRequest) *port.GetLastPaymentResponse); ok {
 		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*port.GetLatestUserBalanceResponse)
+			r0 = ret.Get(0).(*port.GetLastPaymentResponse)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, port.GetLatestUserBalanceRequest) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, port.GetLastPaymentRequest) error); ok {
 		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
