@@ -19,4 +19,5 @@ const (
 	UserIsNotPremium                       ErrorType = "ER1042 User is not premium"
 	AmountMustGreaterThanZeroError         ErrorType = "ER1042 Amount Must Greater Than Zero"
 	BalanceIsNotEnoughError                ErrorType = "ER1042 Balance Is Not Enough"
+	InvalidDateOrderStateTransitionError   ErrorType = "ER1042 Invalid Date Order State Transition"
 )

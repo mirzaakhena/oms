@@ -42,6 +42,6 @@ func (o OrderID) String() string {
 type OrderIDRequest struct {
 	OutletCode    string
 	Date          time.Time
-	PaymentMethod PaymentMethod
+	PaymentMethod PaymentMethodEnum
 	Sequence      int
 }

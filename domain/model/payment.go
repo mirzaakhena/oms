@@ -49,34 +49,23 @@ func NewPayment(req PaymentRequest) (*Payment, error) {
 		OrderFinishNotifyURL: req.OrderFinishNotifyURL,
 	}
 
-	err := payment.AddPaymentStatus(AddPaymentStateRequest{
-		NewState: WaitingPaymentState,
-		Date:     req.Date,
+	payment.PaymentStates = append(payment.PaymentStates, &PaymentState{
+		State: WaitingPaymentState,
+		Date:  req.Date,
 	})
-
-	if err != nil {
-		return nil, err
-	}
 
 	return payment, nil
 }
 
-func (u *Payment) AddPaymentStatus(req AddPaymentStateRequest) error {
+func (u *Payment) AddPaymentState(req PaymentStateRequest) error {
 
-	lastPaymentStatus := u.GetCurrentPaymentStatus()
-	if lastPaymentStatus != nil {
+	newPaymentState, err := u.GetCurrentPaymentStatus().TransitTo(req)
 
-		err := lastPaymentStatus.ValidateNextPaymentState(PaymentStateRequest{NewState: req.NewState})
-
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
-	u.PaymentStates = append(u.PaymentStates, &PaymentState{
-		State: req.NewState,
-		Date:  req.Date,
-	})
+	u.PaymentStates = append(u.PaymentStates, newPaymentState)
 
 	return nil
 }
@@ -97,9 +86,4 @@ func (u *Payment) GetCurrentPaymentStatus() *PaymentState {
 		return u.PaymentStates[lenPaymentStatus-1]
 	}
 	return nil
-}
-
-type AddPaymentStateRequest struct {
-	NewState PaymentStateEnum
-	Date     time.Time
 }

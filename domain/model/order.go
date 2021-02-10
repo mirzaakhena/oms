@@ -14,7 +14,7 @@ type Order struct {
 	OutletCode    string
 	PhoneNumber   string
 	TableNumber   string
-	PaymentMethod PaymentMethod
+	PaymentMethod PaymentMethodEnum
 	OrderLine     []*OrderItem
 	OrderStates   []*OrderState
 }
@@ -43,7 +43,7 @@ func NewOrder(req OrderRequest) (*Order, error) {
 		orderID, err := NewOrderID(OrderIDRequest{
 			OutletCode:    req.OutletCode,
 			Date:          req.Date,
-			PaymentMethod: PaymentMethod(req.PaymentMethod),
+			PaymentMethod: PaymentMethodEnum(req.PaymentMethod),
 			Sequence:      req.SequenceIndex,
 		})
 		if err != nil {
@@ -52,9 +52,9 @@ func NewOrder(req OrderRequest) (*Order, error) {
 		resultOrderID = orderID
 	}
 
-	var resultPaymentMethod PaymentMethod
+	var resultPaymentMethod PaymentMethodEnum
 	{
-		paymentMethod, err := NewPaymentMethod(req.PaymentMethod)
+		paymentMethod, err := NewPaymentMethodEnum(req.PaymentMethod)
 		if err != nil {
 			return nil, err
 		}

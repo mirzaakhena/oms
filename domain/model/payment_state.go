@@ -8,6 +8,14 @@ import (
 
 type PaymentStateEnum string
 
+const (
+	WaitingPaymentState   = PaymentStateEnum("WAITING")
+	PaidPaymentState      = PaymentStateEnum("PAID")
+	ExpiredPaymentState   = PaymentStateEnum("EXPIRED")
+	FailPaymentState      = PaymentStateEnum("FAIL")
+	CancelledPaymentState = PaymentStateEnum("CANCELLED")
+)
+
 type PaymentState struct {
 	State PaymentStateEnum
 	Date  time.Time
@@ -17,19 +25,24 @@ type validateTransitionRequest struct {
 	ToState PaymentStateEnum
 }
 
-type validateTransition func(toState validateTransitionRequest) bool
+type validateTransitionType func(toState validateTransitionRequest) bool
 
-var paymentStateRule = map[PaymentStateEnum]validateTransition{
+var paymentStateRule = map[PaymentStateEnum]validateTransitionType{
+
 	WaitingPaymentState: func(req validateTransitionRequest) bool {
-		if req.ToState == PaidPaymentState {
+
+		switch req.ToState {
+
+		case PaidPaymentState:
+			return true
+
+		case ExpiredPaymentState:
+			return true
+
+		case FailPaymentState:
 			return true
 		}
-		if req.ToState == ExpiredPaymentState {
-			return true
-		}
-		if req.ToState == FailPaymentState {
-			return true
-		}
+
 		return false
 	},
 
@@ -50,29 +63,33 @@ var paymentStateRule = map[PaymentStateEnum]validateTransition{
 	},
 }
 
-const (
-	WaitingPaymentState   = PaymentStateEnum("WAITING")
-	PaidPaymentState      = PaymentStateEnum("PAID")
-	ExpiredPaymentState   = PaymentStateEnum("EXPIRED")
-	FailPaymentState      = PaymentStateEnum("FAIL")
-	CancelledPaymentState = PaymentStateEnum("CANCELLED")
-)
+func NewPaymentState(req PaymentStateRequest) *PaymentState {
+	return &PaymentState{
+		State: req.NewState,
+		Date:  req.Date,
+	}
+}
 
-func (r PaymentState) ValidateNextPaymentState(newPaymentState PaymentStateRequest) error {
+func (r PaymentState) TransitTo(req PaymentStateRequest) (*PaymentState, error) {
 
 	validateTransitionFunc := paymentStateRule[r.State]
 
 	isAllowed := validateTransitionFunc(validateTransitionRequest{
-		ToState: newPaymentState.NewState,
+		ToState: req.NewState,
 	})
 
 	if !isAllowed {
-		return shared.NotAllowedOrderStateTransitionError.Var(r, newPaymentState.NewState)
+		return nil, shared.NotAllowedOrderStateTransitionError.Var(r, req.NewState)
 	}
 
-	return nil
+	if r.Date.After(req.Date) {
+		return nil, shared.InvalidDateOrderStateTransitionError.Var(r, req.NewState)
+	}
+
+	return NewPaymentState(req), nil
 }
 
 type PaymentStateRequest struct {
 	NewState PaymentStateEnum
+	Date     time.Time
 }
